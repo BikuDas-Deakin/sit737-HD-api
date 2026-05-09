@@ -1,0 +1,11 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/sit737-26t1-biku-das-f3a53f3/my-repo/capstone-api:v1'
+      - '.'
+images:
+  - 'us-central1-docker.pkg.dev/sit737-26t1-biku-das-f3a53f3/my-repo/capstone-api:v1'
+options:
+  logging: CLOUD_LOGGING_ONLY
