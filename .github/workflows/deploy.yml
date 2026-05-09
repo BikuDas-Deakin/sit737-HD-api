@@ -26,8 +26,14 @@ jobs:
           push: true
           tags: bikudas8deakin/capstone-api:latest
 
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
+      - name: Install gke-gcloud-auth-plugin and kubectl
+        run: |
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          sudo mv kubectl /usr/local/bin/
+          echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee /etc/apt/sources.list.d/google-cloud-sdk.list
+          curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+          sudo apt-get update -qq && sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
 
       - name: Configure kubeconfig
         run: |
@@ -35,6 +41,8 @@ jobs:
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > ~/.kube/config
 
       - name: Deploy to GKE
+        env:
+          USE_GKE_GCLOUD_AUTH_PLUGIN: "True"
         run: |
-          kubectl apply -f deployment.yaml
+          kubectl apply -f deployment.yaml --validate=false
           kubectl rollout status deployment/capstone-api
